@@ -86,7 +86,7 @@ def feature_selection(clean_data, cols, n=5):
                                                                     random_state=random_state)
 
         param_grid = {'kernel': ['linear'], 'C': [0.01, 1, 10]}
-        clf = GridSearchCV(SVR(), param_grid, cv=5)
+        clf = GridSearchCV(SVR(), param_grid, n_jobs=-1, cv=5)
         clf = clf.fit(x_train_std, y_train)
 
         train_scr = r2_score(y_train, clf.predict(x_train_std))
@@ -105,7 +105,6 @@ def feature_selection(clean_data, cols, n=5):
 def visual_data_prep(clean_data, prev_data, cols, n=5):
     df = pd.DataFrame()
     for outcome_col in cols:
-        print("analysing ", outcome_col)
         x_data = clean_data.loc[:, clean_data.columns.isin(prevention_cols + behavior_cols)]
         y_data = clean_data.loc[:, outcome_col]
 
@@ -116,7 +115,7 @@ def visual_data_prep(clean_data, prev_data, cols, n=5):
                                                                     random_state=random_state)
 
         param_grid = {'kernel': ['linear'], 'C': [0.01, 1, 10]}
-        clf = GridSearchCV(SVR(), param_grid, cv=5)
+        clf = GridSearchCV(SVR(), param_grid, n_jobs=-1, cv=5)
         clf = clf.fit(x_train_std, y_train)
 
         train_scr = r2_score(y_train, clf.predict(x_train_std))
@@ -150,8 +149,8 @@ def append_existing_data(df, prev_data):
 
         df2 = df[df['Outcome'] == outcome_col]
         # Weighted average prevalence for the outcome
-        df2['OutcomePrevalence'] = np.sum(outcome_row.Data_Value * outcome_row.PopulationCount) / np.sum(
-            outcome_row.PopulationCount)
+        df2['OutcomePrevalence'] = np.sum(outcome_row.Data_Value * pd.to_numeric(outcome_row.PopulationCount.str.replace(",", ""))) / np.sum(
+            pd.to_numeric(outcome_row.PopulationCount.str.replace(",", "")))
         prevention = df2['Prevention'].iloc[:]
 
         p_list = []
@@ -159,8 +158,8 @@ def append_existing_data(df, prev_data):
             prevention_row = prev_data[prev_data.MeasureId == p]
             # Weighted average prevalence for the prevention
             prevention_prevalence = np.sum(
-                prevention_row.Data_Value * prevention_row.PopulationCount) / np.sum(
-                prevention_row.PopulationCount)
+                prevention_row.Data_Value * pd.to_numeric(prevention_row.PopulationCount.str.replace(",", ""))) / np.sum(
+                pd.to_numeric(prevention_row.PopulationCount.str.replace(",", "")))
             p_list.append(prevention_prevalence)
 
         df2['PreventionPrevalence'] = p_list

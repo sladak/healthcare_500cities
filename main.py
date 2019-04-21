@@ -42,7 +42,8 @@ def main():
         top_n = int(input('Enter the number of top features you want to select:\n'))
 
         logging.info("About to run feature selection for city level data")
-        feature_selection_df = feature_selection(city_pv, outcome_cols, top_n)
+        # feature_selection_df = feature_selection(city_pv, outcome_cols, top_n)
+        feature_selection_df = feature_selection(tract_pv, outcome_cols, top_n)
         feature_selection_df.to_csv("city_data.csv")
         logging.info("Country data has been saved to csv")
 
@@ -58,13 +59,13 @@ def main():
         state_feature_selection_df.to_csv("state_feature_selection.csv")
         logging.info("States data has been saved to csv")
     elif mode == 2:
-        print("You have chosen to generate output file for visualization")
+        print("You have chose to generate output file for visualization")
 
         result = pd.DataFrame()
         logging.info("Start data prep in US level")
         prev_data = data[data['GeographicLevel'] == 'US']
 
-        #df = visual_data_prep(city_pv, prev_data, outcome_cols, 5)
+        # df = visual_data_prep(city_pv, prev_data, outcome_cols, 5)
         df = visual_data_prep(tract_pv, prev_data, outcome_cols, 5)
         df['Region'] = 'US'
         df['Level'] = 'US'
@@ -120,8 +121,7 @@ def main():
                     city_df = pd.concat([city_df, df])
             result = pd.concat([result, city_df])
         result = pd.concat([result, state_df])
-        col_order = ['Region','Level','Outcome','Prevention','OutcomePrevalence','PredictionAccuracyScore','PreventionPrevalence','PreventionRank','PreventionCalculationLevel']
-        result = result [col_order]
+
         logging.info("Complete data prep in State level")
 
         result.to_csv("visual_input_tract_with_city.csv", index=False)
